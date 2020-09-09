@@ -1,7 +1,6 @@
 package com.vish.moviecatalogservice.resource;
 
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,19 +19,14 @@ import com.vish.moviecatalogservice.models.Rating;
 @RequestMapping("/catalog")
 public class MovieCatalogResource {
 	
-	@Bean
-	@LoadBalanced
-	public RestTemplate getRestTemplate() {
-		return new RestTemplate();
-	}
+	@Autowired
+	RestTemplate restTemplate;
 	
-    private RestTemplate restTemplate = new RestTemplate();
-
 	@RequestMapping("/{movieId}")
 	public CatalogItem getCatalogItem(@PathVariable("movieId") String movieId) {
 		
-		Movie movieInfo = restTemplate.getForObject("http://localhost:8082/movies/" + movieId, Movie.class);
-        Rating rating = restTemplate.getForObject("http://localhost:8083/ratings/" + movieId, Rating.class);
+		Movie movieInfo = restTemplate.getForObject("http://movie-info-service/movies/" + movieId, Movie.class);
+        Rating rating = restTemplate.getForObject("http://movie-rating-service/ratings/" + movieId, Rating.class);
        
 		return new CatalogItem(movieInfo.getId(), movieInfo.getName(), rating.getRating());
     }
